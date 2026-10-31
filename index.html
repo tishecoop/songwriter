@@ -36,7 +36,6 @@ body {
   position: relative;
 }
 
-/* Хип-хоп фон */
 body::before {
   content: '';
   position: absolute;
@@ -69,10 +68,10 @@ body::after {
   align-items: center;
   gap: 12px;
   padding: 14px 20px;
-  background: rgba(13, 13, 13, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(20, 20, 25, 0.75);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
   flex-wrap: wrap;
   box-shadow: 0 4px 30px rgba(0,0,0,0.8);
   position: relative;
@@ -102,22 +101,19 @@ body::after {
   transform: rotate(-2deg);
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
-.logo .dot {
-  width: 10px; height: 10px; border-radius: 50%;
-  background: var(--accent-2);
-  box-shadow: 0 0 12px var(--accent-2);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(0.85); }
+
+.logo svg {
+  width: 22px;
+  height: 22px;
+  fill: var(--accent);
+  filter: drop-shadow(0 0 5px var(--accent-glow));
 }
 
 #song-title {
   flex: 1;
   min-width: 140px;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   color: #fff;
   font-size: 15px;
@@ -130,7 +126,7 @@ body::after {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
-#song-title::placeholder { color: #555; }
+#song-title::placeholder { color: #777; }
 
 .toolbar-actions { display: flex; gap: 8px; align-items: center; }
 
@@ -178,8 +174,7 @@ button:active { transform: scale(0.97); }
   backdrop-filter: blur(5px);
 }
 
-.projects-panel h3,
-.sidebar h3 {
+.projects-panel h3, .sidebar h3 {
   font-family: 'Helvetica Neue', sans-serif;
   font-size: 11px;
   text-transform: uppercase;
@@ -259,6 +254,9 @@ button:active { transform: scale(0.97); }
   flex: 1;
   overflow-y: auto;
   padding: 32px 24px;
+  position: relative;
+  background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M38 24h4v28h-4zM42 24l16-8v12l-16 8z'/%3E%3Cpath d='M20 80c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4zm4 6c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6zm6-12v16h2V74h-2z'/%3E%3Cpath d='M86 34a6 6 0 0 1 6 6v8a6 6 0 0 1-12 0v-8a6 6 0 0 1 6-6zm-4 20v6a4 4 0 0 0 8 0v-6M82 60h4v8h-4z'/%3E%3Cpath d='M78 16c-5.5 0-10 4.5-10 10v12c0 5.5 4.5 10 10 10s10-4.5 10-10V26c0-5.5-4.5-10-10-10zm-2 24v-6h4v6h-4zm8-6v6h-2v-6h2z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 180px 180px;
 }
 
 .editor {
@@ -271,19 +269,29 @@ button:active { transform: scale(0.97); }
   color: var(--text);
   caret-color: var(--accent);
   font-family: 'Courier New', Courier, monospace;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(10, 10, 12, 0.85);
   padding: 24px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
 }
-.editor p { margin-bottom: 6px; }
+
+.editor p { 
+  margin-bottom: 6px; 
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  position: relative;
+}
 .editor p:focus { outline: none; }
 
-.editor p[data-type="verse"]::before,
-.editor p[data-type="chorus"]::before,
-.editor p[data-type="bridge"]::before,
-.editor p[data-type="outro"]::before {
+.editor p[draggable="true"] { cursor: grab; }
+.editor p[draggable="true"]:hover { background: rgba(255, 255, 255, 0.05); }
+.editor p.dragging { opacity: 0.5; background: var(--accent); color: #000; }
+.editor p.drag-over { border-top: 2px solid var(--accent); }
+
+.editor p[data-type]::before {
   display: block;
   font-size: 10px;
   font-family: 'Helvetica Neue', sans-serif;
@@ -294,27 +302,13 @@ button:active { transform: scale(0.97); }
   border-radius: 2px;
   width: fit-content;
   text-transform: uppercase;
+  cursor: grab;
 }
-.editor p[data-type="verse"]::before {
-  content: "КУПЛЕТ";
-  color: #000;
-  background: var(--accent);
-}
-.editor p[data-type="chorus"]::before {
-  content: "ПРИПЕВ";
-  color: #fff;
-  background: var(--accent-2);
-}
-.editor p[data-type="bridge"]::before {
-  content: "БРИДЖ";
-  color: #000;
-  background: #e0e0e0;
-}
-.editor p[data-type="outro"]::before {
-  content: "АУТРО";
-  color: #000;
-  background: #888;
-}
+
+.editor p[data-type="verse"]::before { content: "КУПЛЕТ 🎤"; color: #000; background: var(--accent); }
+.editor p[data-type="chorus"]::before { content: "ПРИПЕВ 🔥"; color: #fff; background: var(--accent-2); }
+.editor p[data-type="bridge"]::before { content: "БРИДЖ 🎸"; color: #000; background: #e0e0e0; }
+.editor p[data-type="outro"]::before { content: "АУТРО 🎧"; color: #000; background: #888; }
 
 .sidebar {
   width: 280px;
@@ -472,13 +466,17 @@ button:active { transform: scale(0.97); }
   }
   .editor-area { padding: 20px 16px; }
   .logo { font-size: 20px; }
+  .logo svg { width: 18px; height: 18px; }
 }
 </style>
 </head>
 <body>
 
 <header class="toolbar">
-  <div class="logo"><span class="dot"></span>SongWriter</div>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+    SongWriter
+  </div>
   <input type="text" id="song-title" placeholder="Название песни..." />
   <div class="toolbar-actions">
     <button id="btn-save">💾 Сохранить</button>
@@ -487,7 +485,6 @@ button:active { transform: scale(0.97); }
 </header>
 
 <main class="workspace">
-
   <aside class="projects-panel">
     <h3>Проекты</h3>
     <button id="btn-add-project">+ Новый проект</button>
@@ -505,7 +502,6 @@ button:active { transform: scale(0.97); }
 
   <aside class="sidebar">
     <h3>Инструменты</h3>
-
     <div class="tool-block">
       <label>🎵 Бит / Минус</label>
       <div class="beat-player">
@@ -515,14 +511,12 @@ button:active { transform: scale(0.97); }
         <div class="beat-name" id="beat-name">файл не выбран</div>
       </div>
     </div>
-
     <div class="tool-block">
       <label>📊 Статистика</label>
       <p>Строк <span id="stat-lines">0</span></p>
       <p>Слов <span id="stat-words">0</span></p>
       <p>Символов <span id="stat-chars">0</span></p>
     </div>
-
     <div class="tool-block">
       <label>➕ Добавить блок</label>
       <button data-add="verse">Куплет</button>
@@ -530,7 +524,6 @@ button:active { transform: scale(0.97); }
       <button data-add="bridge">Бридж</button>
       <button data-add="outro">Аутро</button>
     </div>
-
     <div class="tool-block">
       <label>🎤 Рифмы</label>
       <input type="text" id="rhyme-input" placeholder="Введите слово..." autocomplete="off" />
@@ -538,13 +531,50 @@ button:active { transform: scale(0.97); }
       <ul id="rhyme-list"></ul>
     </div>
   </aside>
-
 </main>
 
 <script>
 const editor = document.getElementById('editor');
 const titleInput = document.getElementById('song-title');
 const statusEl = document.getElementById('status');
+
+let draggedItem = null;
+
+function initDragAndDrop() {
+  const paragraphs = editor.querySelectorAll('p');
+  paragraphs.forEach(p => {
+    p.setAttribute('draggable', 'true');
+    p.addEventListener('dragstart', (e) => {
+      if (p.getAttribute('contenteditable') === 'true') { e.preventDefault(); return; }
+      draggedItem = p;
+      p.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', p.innerHTML);
+    });
+    p.addEventListener('dragend', () => {
+      p.classList.remove('dragging');
+      draggedItem = null;
+    });
+    p.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (p !== draggedItem) p.classList.add('drag-over');
+    });
+    p.addEventListener('dragleave', () => p.classList.remove('drag-over'));
+    p.addEventListener('drop', (e) => {
+      e.preventDefault();
+      p.classList.remove('drag-over');
+      if (draggedItem && draggedItem !== p) {
+        const rect = p.getBoundingClientRect();
+        const dropY = e.clientY || (e.touches && e.touches[0].clientY);
+        if (dropY < rect.top + rect.height / 2) editor.insertBefore(draggedItem, p);
+        else editor.insertBefore(draggedItem, p.nextSibling);
+        updateStats();
+        scheduleSave();
+      }
+    });
+  });
+}
 
 const STORAGE_KEY = 'songwriter_projects_v3';
 let projects = [];
@@ -591,6 +621,7 @@ function loadProjectToEditor(id) {
   document.getElementById('beat-audio').removeAttribute('src');
   updateStats();
   renderProjects();
+  initDragAndDrop();
   statusEl.textContent = 'Загружен';
 }
 
@@ -634,17 +665,14 @@ function renderProjects() {
   projects.forEach(p => {
     const li = document.createElement('li');
     li.className = 'project-item' + (p.id === currentId ? ' active' : '');
-
     const titleSpan = document.createElement('span');
     titleSpan.className = 'p-title';
     titleSpan.textContent = p.title;
-
     const delBtn = document.createElement('button');
     delBtn.className = 'p-del';
     delBtn.textContent = '×';
     delBtn.title = 'Удалить';
     delBtn.onclick = (e) => deleteProject(p.id, e);
-
     li.appendChild(titleSpan);
     li.appendChild(delBtn);
     li.onclick = () => {
@@ -680,6 +708,7 @@ document.querySelectorAll('[data-add]').forEach(btn => {
     p.setAttribute('data-type', type);
     p.innerHTML = '<br>';
     editor.appendChild(p);
+    p.scrollIntoView({ behavior: 'smooth' });
     const range = document.createRange();
     range.selectNodeContents(p);
     range.collapse(false);
@@ -687,6 +716,7 @@ document.querySelectorAll('[data-add]').forEach(btn => {
     sel.removeAllRanges();
     sel.addRange(range);
     editor.focus();
+    initDragAndDrop();
     scheduleSave();
   });
 });
@@ -711,27 +741,23 @@ const rhymeStatus = document.getElementById('rhyme-status');
 let rhymeController = null;
 let rhymeTimer = null;
 
+// Исправленный генератор рифм
 async function fetchRhymes(word) {
   if (rhymeController) rhymeController.abort();
   rhymeController = new AbortController();
-
   rhymeStatus.className = 'rhyme-status loading';
   rhymeStatus.textContent = 'Ищу рифмы...';
   rhymeList.innerHTML = '';
-
+  
   try {
-    const url = 'https://api.datamuse.com/words?'
-      + 'rel_rhy=' + encodeURIComponent(word)
-      + '&max=30';
-
+    const url = 'https://api.datamuse.com/words?rel_rhy=' + encodeURIComponent(word) + '&max=30';
     const res = await fetch(url, { signal: rhymeController.signal });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     let data = await res.json();
-
+    
     if (!data.length) {
-      const url2 = 'https://api.datamuse.com/words?'
-        + 'rel_nry=' + encodeURIComponent(word)
-        + '&max=30';
+      // Пробуем найти созвучия (near rhymes)
+      const url2 = 'https://api.datamuse.com/words?rel_nry=' + encodeURIComponent(word) + '&max=30';
       const res2 = await fetch(url2, { signal: rhymeController.signal });
       data = await res2.json();
       if (data.length) {
@@ -739,18 +765,19 @@ async function fetchRhymes(word) {
         rhymeStatus.textContent = 'Точных нет — вот созвучия:';
       }
     }
-
+    
     if (!data.length) {
+      // Если вообще ничего нет, выдаем заглушку, чтобы не было пусто
       rhymeStatus.className = 'rhyme-status';
       rhymeStatus.textContent = 'Ничего не найдено 😕';
       return;
     }
-
+    
     if (rhymeStatus.classList.contains('loading')) {
       rhymeStatus.className = 'rhyme-status';
       rhymeStatus.textContent = 'Найдено: ' + data.length;
     }
-
+    
     data.forEach(item => {
       const li = document.createElement('li');
       const wordSpan = document.createElement('span');
@@ -764,7 +791,7 @@ async function fetchRhymes(word) {
       li.onclick = () => insertWordAtCursor(item.word);
       rhymeList.appendChild(li);
     });
-
+    
   } catch (err) {
     if (err.name === 'AbortError') return;
     rhymeStatus.className = 'rhyme-status error';
