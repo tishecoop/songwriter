@@ -6,7 +6,8 @@
 <title>SongWriter — студия текстов песен</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+<!-- Шрифт для граффити -->
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Spray+Paint&family=Rubik+Mono+One&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -36,15 +37,16 @@ body {
   position: relative;
 }
 
+/* Новый хип-хоп фон 4K */
 body::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-image: url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=2000&auto=format&fit=crop');
+  background-image: url('https://images.unsplash.com/photo-1598209276265-64b1c9289f5c?q=80&w=3840&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
-  opacity: 0.15;
-  filter: grayscale(80%) contrast(120%) brightness(0.4);
+  opacity: 0.35;
+  filter: contrast(110%) brightness(0.5);
   z-index: -1;
   pointer-events: none;
 }
@@ -53,7 +55,7 @@ body::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(180deg, rgba(13,13,13,0.6) 0%, rgba(13,13,13,0.95) 100%);
+  background: linear-gradient(180deg, rgba(13,13,13,0.7) 0%, rgba(13,13,13,0.95) 100%);
   z-index: -1;
   pointer-events: none;
 }
@@ -68,7 +70,7 @@ body::after {
   align-items: center;
   gap: 12px;
   padding: 14px 20px;
-  background: rgba(20, 20, 25, 0.75);
+  background: rgba(20, 20, 25, 0.85);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border-bottom: 1px solid rgba(212, 175, 55, 0.2);
@@ -86,26 +88,25 @@ body::after {
   opacity: 0.8;
 }
 
+/* Граффити-шрифт в шапке */
 .logo {
-  font-family: 'Permanent Marker', cursive;
-  font-size: 24px;
-  letter-spacing: 1px;
-  background: linear-gradient(135deg, #fff, #d4af37, #ff4500);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-family: 'Rubik Spray Paint', cursive;
+  font-size: 32px;
+  letter-spacing: 2px;
+  color: #fff;
+  -webkit-text-stroke: 1.5px #000;
+  text-shadow: 3px 3px 0 var(--accent-2), -1px -1px 0 #000;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 8px;
-  transform: rotate(-2deg);
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  transform: rotate(-3deg);
 }
 
 .logo svg {
-  width: 22px;
-  height: 22px;
-  fill: var(--accent);
+  width: 28px;
+  height: 28px;
+  fill: var(--accent-2);
   filter: drop-shadow(0 0 5px var(--accent-glow));
 }
 
@@ -259,10 +260,14 @@ button:active { transform: scale(0.97); }
   background-size: 180px 180px;
 }
 
+/* Рабочая область с изменением размера */
 .editor {
   max-width: 700px;
   margin: 0 auto;
   min-height: 60vh;
+  height: 60vh; /* Начальная высота */
+  resize: vertical; /* Позволяет менять размер */
+  overflow: auto;
   font-size: 18px;
   line-height: 2;
   outline: none;
@@ -283,26 +288,46 @@ button:active { transform: scale(0.97); }
   border-radius: 4px;
   transition: background 0.2s;
   position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 .editor p:focus { outline: none; }
 
-.editor p[draggable="true"] { cursor: grab; }
-.editor p[draggable="true"]:hover { background: rgba(255, 255, 255, 0.05); }
-.editor p.dragging { opacity: 0.5; background: var(--accent); color: #000; }
-.editor p.drag-over { border-top: 2px solid var(--accent); }
+/* Стрелочки для перемещения блоков */
+.block-controls {
+  display: inline-flex;
+  gap: 4px;
+  margin-right: 8px;
+  user-select: none;
+}
+.block-controls button {
+  padding: 2px 6px;
+  font-size: 12px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text);
+  line-height: 1;
+}
+.block-controls button:hover {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
 
 .editor p[data-type]::before {
-  display: block;
+  display: inline-block;
   font-size: 10px;
   font-family: 'Helvetica Neue', sans-serif;
   font-weight: 800;
   letter-spacing: 2px;
-  margin-bottom: 6px;
   padding: 3px 10px;
   border-radius: 2px;
-  width: fit-content;
   text-transform: uppercase;
-  cursor: grab;
+  margin-right: 8px;
 }
 
 .editor p[data-type="verse"]::before { content: "КУПЛЕТ 🎤"; color: #000; background: var(--accent); }
@@ -429,11 +454,6 @@ button:active { transform: scale(0.97); }
   color: var(--accent);
   padding-left: 14px;
 }
-#rhyme-list li .r-score {
-  font-size: 10px;
-  color: var(--text-dim);
-  opacity: 0.6;
-}
 
 .rhyme-status {
   font-size: 11px;
@@ -465,8 +485,8 @@ button:active { transform: scale(0.97); }
     max-height: 45vh;
   }
   .editor-area { padding: 20px 16px; }
-  .logo { font-size: 20px; }
-  .logo svg { width: 18px; height: 18px; }
+  .logo { font-size: 24px; }
+  .logo svg { width: 20px; height: 20px; }
 }
 </style>
 </head>
@@ -538,41 +558,46 @@ const editor = document.getElementById('editor');
 const titleInput = document.getElementById('song-title');
 const statusEl = document.getElementById('status');
 
-let draggedItem = null;
-
-function initDragAndDrop() {
-  const paragraphs = editor.querySelectorAll('p');
-  paragraphs.forEach(p => {
-    p.setAttribute('draggable', 'true');
-    p.addEventListener('dragstart', (e) => {
-      if (p.getAttribute('contenteditable') === 'true') { e.preventDefault(); return; }
-      draggedItem = p;
-      p.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/html', p.innerHTML);
-    });
-    p.addEventListener('dragend', () => {
-      p.classList.remove('dragging');
-      draggedItem = null;
-    });
-    p.addEventListener('dragover', (e) => {
+// Функция для добавления стрелочек к блокам
+function addBlockControls() {
+  editor.querySelectorAll('p[data-type]').forEach(p => {
+    // Удаляем старые стрелочки, чтобы не дублировались
+    const oldControls = p.querySelector('.block-controls');
+    if (oldControls) oldControls.remove();
+    
+    const controls = document.createElement('span');
+    controls.className = 'block-controls';
+    controls.setAttribute('contenteditable', 'false'); // Чтобы не мешать печатать
+    
+    const btnUp = document.createElement('button');
+    btnUp.innerHTML = '⬆️';
+    btnUp.title = 'Переместить вверх';
+    btnUp.onclick = (e) => {
       e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      if (p !== draggedItem) p.classList.add('drag-over');
-    });
-    p.addEventListener('dragleave', () => p.classList.remove('drag-over'));
-    p.addEventListener('drop', (e) => {
-      e.preventDefault();
-      p.classList.remove('drag-over');
-      if (draggedItem && draggedItem !== p) {
-        const rect = p.getBoundingClientRect();
-        const dropY = e.clientY || (e.touches && e.touches[0].clientY);
-        if (dropY < rect.top + rect.height / 2) editor.insertBefore(draggedItem, p);
-        else editor.insertBefore(draggedItem, p.nextSibling);
+      const prev = p.previousElementSibling;
+      if (prev) {
+        editor.insertBefore(p, prev);
         updateStats();
         scheduleSave();
       }
-    });
+    };
+    
+    const btnDown = document.createElement('button');
+    btnDown.innerHTML = '⬇️';
+    btnDown.title = 'Переместить вниз';
+    btnDown.onclick = (e) => {
+      e.preventDefault();
+      const next = p.nextElementSibling;
+      if (next) {
+        editor.insertBefore(next, p);
+        updateStats();
+        scheduleSave();
+      }
+    };
+    
+    controls.appendChild(btnUp);
+    controls.appendChild(btnDown);
+    p.insertBefore(controls, p.firstChild);
   });
 }
 
@@ -621,15 +646,21 @@ function loadProjectToEditor(id) {
   document.getElementById('beat-audio').removeAttribute('src');
   updateStats();
   renderProjects();
-  initDragAndDrop();
+  addBlockControls();
   statusEl.textContent = 'Загружен';
 }
 
 function saveCurrent() {
   const p = projects.find(x => x.id === currentId);
   if (!p) return;
+  
+  // Очищаем код от стрелочек перед сохранением, чтобы они не записывались в базу
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = editor.innerHTML;
+  tempDiv.querySelectorAll('.block-controls').forEach(el => el.remove());
+  
   p.title = titleInput.value.trim() || 'Без названия';
-  p.content = editor.innerHTML;
+  p.content = tempDiv.innerHTML;
   p.updatedAt = Date.now();
   saveProjects();
   statusEl.textContent = '✓ ' + new Date().toLocaleTimeString();
@@ -692,7 +723,11 @@ editor.addEventListener('input', () => { updateStats(); scheduleSave(); });
 titleInput.addEventListener('input', scheduleSave);
 
 function updateStats() {
-  const text = editor.innerText;
+  // Временно убираем стрелочки для подсчета символов, чтобы не считались иконки
+  const clone = editor.cloneNode(true);
+  clone.querySelectorAll('.block-controls').forEach(el => el.remove());
+  const text = clone.innerText;
+  
   const lines = text.split('\n').filter(l => l.trim()).length;
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
   const chars = text.replace(/\s/g, '').length;
@@ -709,6 +744,8 @@ document.querySelectorAll('[data-add]').forEach(btn => {
     p.innerHTML = '<br>';
     editor.appendChild(p);
     p.scrollIntoView({ behavior: 'smooth' });
+    
+    // Ставим курсор в блок после добавления
     const range = document.createRange();
     range.selectNodeContents(p);
     range.collapse(false);
@@ -716,7 +753,8 @@ document.querySelectorAll('[data-add]').forEach(btn => {
     sel.removeAllRanges();
     sel.addRange(range);
     editor.focus();
-    initDragAndDrop();
+    
+    addBlockControls();
     scheduleSave();
   });
 });
@@ -734,6 +772,7 @@ beatFileInput.addEventListener('change', () => {
   if (p) { p.beatName = file.name; saveProjects(); }
 });
 
+/* Генератор рифм (упрощенный и рабочий) */
 const rhymeInput = document.getElementById('rhyme-input');
 const rhymeList = document.getElementById('rhyme-list');
 const rhymeStatus = document.getElementById('rhyme-status');
@@ -741,7 +780,6 @@ const rhymeStatus = document.getElementById('rhyme-status');
 let rhymeController = null;
 let rhymeTimer = null;
 
-// Исправленный генератор рифм
 async function fetchRhymes(word) {
   if (rhymeController) rhymeController.abort();
   rhymeController = new AbortController();
@@ -750,43 +788,31 @@ async function fetchRhymes(word) {
   rhymeList.innerHTML = '';
   
   try {
+    // Используем Datamuse (он лучше работает для английского, но иногда выдает русские созвучия)
     const url = 'https://api.datamuse.com/words?rel_rhy=' + encodeURIComponent(word) + '&max=30';
     const res = await fetch(url, { signal: rhymeController.signal });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
     let data = await res.json();
     
     if (!data.length) {
-      // Пробуем найти созвучия (near rhymes)
       const url2 = 'https://api.datamuse.com/words?rel_nry=' + encodeURIComponent(word) + '&max=30';
       const res2 = await fetch(url2, { signal: rhymeController.signal });
       data = await res2.json();
-      if (data.length) {
-        rhymeStatus.className = 'rhyme-status';
-        rhymeStatus.textContent = 'Точных нет — вот созвучия:';
-      }
     }
     
     if (!data.length) {
-      // Если вообще ничего нет, выдаем заглушку, чтобы не было пусто
       rhymeStatus.className = 'rhyme-status';
-      rhymeStatus.textContent = 'Ничего не найдено 😕';
+      rhymeStatus.textContent = 'Ничего не найдено 😕 (Попробуйте другое слово)';
       return;
     }
     
-    if (rhymeStatus.classList.contains('loading')) {
-      rhymeStatus.className = 'rhyme-status';
-      rhymeStatus.textContent = 'Найдено: ' + data.length;
-    }
+    rhymeStatus.className = 'rhyme-status';
+    rhymeStatus.textContent = 'Найдено: ' + data.length;
     
     data.forEach(item => {
       const li = document.createElement('li');
       const wordSpan = document.createElement('span');
       wordSpan.textContent = item.word;
-      const scoreSpan = document.createElement('span');
-      scoreSpan.className = 'r-score';
-      scoreSpan.textContent = item.score || '';
       li.appendChild(wordSpan);
-      li.appendChild(scoreSpan);
       li.title = 'Кликните, чтобы вставить в текст';
       li.onclick = () => insertWordAtCursor(item.word);
       rhymeList.appendChild(li);
@@ -796,7 +822,6 @@ async function fetchRhymes(word) {
     if (err.name === 'AbortError') return;
     rhymeStatus.className = 'rhyme-status error';
     rhymeStatus.textContent = 'Ошибка сети. Проверьте интернет.';
-    console.warn('Rhyme error:', err);
   }
 }
 
@@ -825,12 +850,14 @@ function insertWordAtCursor(word) {
   const sel = window.getSelection();
   if (!sel.rangeCount) {
     editor.innerHTML += ' ' + word;
+    addBlockControls();
     scheduleSave();
     return;
   }
   const range = sel.getRangeAt(0);
   if (!editor.contains(range.commonAncestorContainer)) {
     editor.innerHTML += ' ' + word;
+    addBlockControls();
     scheduleSave();
     return;
   }
@@ -851,16 +878,4 @@ document.getElementById('btn-save').addEventListener('click', saveCurrent);
 
 loadProjects();
 if (!projects.length) {
-  projects.push(newProjectData());
-  currentId = projects[0].id;
-  saveProjects();
-} else {
-  currentId = projects[0].id;
-}
-renderProjects();
-loadProjectToEditor(currentId);
-updateStats();
-</script>
-
-</body>
-</html>
+  projects.push
