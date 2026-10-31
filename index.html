@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SongWriter — студия текстов песен</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0d0d0d;
+  --bg-panel: rgba(18, 18, 22, 0.92);
+  --bg-card: rgba(30, 30, 38, 0.85);
+  --bg-input: rgba(10, 10, 12, 0.85);
+  --border: #3a3a4a;
+  --text: #f0f0f5;
+  --text-dim: #9e9eae;
+  --accent: #d4af37;
+  --accent-2: #ff4500;
+  --accent-glow: rgba(212, 175, 55, 0.4);
+  --danger: #ff3333;
+}
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* Хип-хоп фон */
+body::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=2000&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.15;
+  filter: grayscale(80%) contrast(120%) brightness(0.4);
+  z-index: -1;
+  pointer-events: none;
+}
+
+body::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, rgba(13,13,13,0.6) 0%, rgba(13,13,13,0.95) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3a3a4a; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: rgba(13, 13, 13, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.8);
+  position: relative;
+  z-index: 10;
+}
+
+.toolbar::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+  opacity: 0.8;
+}
+
+.logo {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 24px;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, #fff, #d4af37, #ff4500);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: rotate(-2deg);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+.logo .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 12px var(--accent-2);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+#song-title {
+  flex: 1;
+  min-width: 140px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 15px;
+  padding: 10px 14px;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+#song-title:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+#song-title::placeholder { color: #555; }
+
+.toolbar-actions { display: flex; gap: 8px; align-items: center; }
+
+button {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 9px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.18s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+button:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+button:active { transform: scale(0.97); }
+
+#status {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: 'Helvetica Neue', sans-serif;
+  min-width: 90px;
+  text-align: right;
+}
+
+.workspace { flex: 1; display: flex; overflow: hidden; }
+
+.projects-panel {
+  width: 230px;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  padding: 16px 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  backdrop-filter: blur(5px);
+}
+
+.projects-panel h3,
+.sidebar h3 {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+
+#btn-add-project {
+  width: 100%;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, var(--accent), #b8860b);
+  border: none;
+  color: #000;
+  font-weight: 800;
+  padding: 11px;
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.2);
+}
+#btn-add-project:hover {
+  background: linear-gradient(135deg, #ffd700, #d4af37);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+}
+
+.project-list { list-style: none; }
+
+.project-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+.project-item:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--border); }
+.project-item.active {
+  border-color: var(--accent);
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.15), transparent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.project-item .p-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.project-item .p-del {
+  color: #666;
+  font-size: 16px;
+  padding: 0 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+  font-weight: bold;
+}
+.project-item .p-del:hover {
+  color: var(--danger);
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.editor-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 24px;
+}
+
+.editor {
+  max-width: 700px;
+  margin: 0 auto;
+  min-height: 60vh;
+  font-size: 18px;
+  line-height: 2;
+  outline: none;
+  color: var(--text);
+  caret-color: var(--accent);
+  font-family: 'Courier New', Courier, monospace;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+}
+.editor p { margin-bottom: 6px; }
+.editor p:focus { outline: none; }
+
+.editor p[data-type="verse"]::before,
+.editor p[data-type="chorus"]::before,
+.editor p[data-type="bridge"]::before,
+.editor p[data-type="outro"]::before {
+  display: block;
+  font-size: 10px;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  padding: 3px 10px;
+  border-radius: 2px;
+  width: fit-content;
+  text-transform: uppercase;
+}
+.editor p[data-type="verse"]::before {
+  content: "КУПЛЕТ";
+  color: #000;
+  background: var(--accent);
+}
+.editor p[data-type="chorus"]::before {
+  content: "ПРИПЕВ";
+  color: #fff;
+  background: var(--accent-2);
+}
+.editor p[data-type="bridge"]::before {
+  content: "БРИДЖ";
+  color: #000;
+  background: #e0e0e0;
+}
+.editor p[data-type="outro"]::before {
+  content: "АУТРО";
+  color: #000;
+  background: #888;
+}
+
+.sidebar {
+  width: 280px;
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border);
+  padding: 16px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  backdrop-filter: blur(5px);
+}
+
+.tool-block {
+  margin-bottom: 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+}
+.tool-block label {
+  display: block;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.tool-block p {
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: var(--text-dim);
+  font-family: 'Helvetica Neue', sans-serif;
+  display: flex;
+  justify-content: space-between;
+}
+.tool-block p span { color: var(--text); font-weight: 600; font-family: monospace; font-size: 14px; }
+.tool-block button { margin: 3px 3px 0 0; font-size: 12px; padding: 7px 10px; }
+
+.beat-player input[type="file"] { display: none; }
+.beat-player .file-label {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  background: var(--bg-input);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'Helvetica Neue', sans-serif;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.beat-player .file-label:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(212, 175, 55, 0.05);
+}
+.beat-player audio {
+  width: 100%;
+  margin-top: 4px;
+  height: 32px;
+  border-radius: 4px;
+  filter: sepia(40%) hue-rotate(10deg) contrast(120%);
+}
+.beat-name {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+#rhyme-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+#rhyme-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+#rhyme-list {
+  list-style: none;
+  font-size: 13px;
+  max-height: 260px;
+  overflow-y: auto;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+#rhyme-list li {
+  padding: 7px 10px;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 4px;
+  margin-bottom: 2px;
+  transition: all 0.12s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#rhyme-list li:hover {
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--accent);
+  padding-left: 14px;
+}
+#rhyme-list li .r-score {
+  font-size: 10px;
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.rhyme-status {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: 'Helvetica Neue', sans-serif;
+  padding: 6px 0;
+  text-align: center;
+}
+.rhyme-status.loading { color: var(--accent); }
+.rhyme-status.error { color: var(--danger); }
+
+@media (max-width: 850px) {
+  .workspace { flex-direction: column; }
+  .projects-panel {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 20vh;
+    padding: 12px;
+  }
+  .projects-panel h3 { margin-bottom: 8px; }
+  #btn-add-project { padding: 8px; margin-bottom: 8px; }
+  .project-list { display: flex; gap: 6px; overflow-x: auto; }
+  .project-item { min-width: 140px; margin-bottom: 0; }
+  .sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    max-height: 45vh;
+  }
+  .editor-area { padding: 20px 16px; }
+  .logo { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+
+<header class="toolbar">
+  <div class="logo"><span class="dot"></span>SongWriter</div>
+  <input type="text" id="song-title" placeholder="Название песни..." />
+  <div class="toolbar-actions">
+    <button id="btn-save">💾 Сохранить</button>
+    <span id="status">Готово</span>
+  </div>
+</header>
+
+<main class="workspace">
+
+  <aside class="projects-panel">
+    <h3>Проекты</h3>
+    <button id="btn-add-project">+ Новый проект</button>
+    <ul class="project-list" id="project-list"></ul>
+  </aside>
+
+  <section class="editor-area">
+    <div id="editor" contenteditable="true" class="editor" spellcheck="true">
+      <p data-type="verse"><br></p>
+      <p><br></p>
+      <p data-type="chorus"><br></p>
+      <p><br></p>
+    </div>
+  </section>
+
+  <aside class="sidebar">
+    <h3>Инструменты</h3>
+
+    <div class="tool-block">
+      <label>🎵 Бит / Минус</label>
+      <div class="beat-player">
+        <label class="file-label" for="beat-file">Загрузить бит (mp3/wav)</label>
+        <input type="file" id="beat-file" accept="audio/*" />
+        <audio id="beat-audio" controls></audio>
+        <div class="beat-name" id="beat-name">файл не выбран</div>
+      </div>
+    </div>
+
+    <div class="tool-block">
+      <label>📊 Статистика</label>
+      <p>Строк <span id="stat-lines">0</span></p>
+      <p>Слов <span id="stat-words">0</span></p>
+      <p>Символов <span id="stat-chars">0</span></p>
+    </div>
+
+    <div class="tool-block">
+      <label>➕ Добавить блок</label>
+      <button data-add="verse">Куплет</button>
+      <button data-add="chorus">Припев</button>
+      <button data-add="bridge">Бридж</button>
+      <button data-add="outro">Аутро</button>
+    </div>
+
+    <div class="tool-block">
+      <label>🎤 Рифмы</label>
+      <input type="text" id="rhyme-input" placeholder="Введите слово..." autocomplete="off" />
+      <div class="rhyme-status" id="rhyme-status">Введите слово и нажмите Enter</div>
+      <ul id="rhyme-list"></ul>
+    </div>
+  </aside>
+
+</main>
+
+<script>
+const editor = document.getElementById('editor');
+const titleInput = document.getElementById('song-title');
+const statusEl = document.getElementById('status');
+
+const STORAGE_KEY = 'songwriter_projects_v3';
+let projects = [];
+let currentId = null;
+
+function loadProjects() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    projects = raw ? JSON.parse(raw) : [];
+  } catch (e) { projects = []; }
+}
+
+function saveProjects() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); }
+  catch (e) { console.warn(e); }
+}
+
+function newProjectData() {
+  return {
+    id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    title: 'Без названия',
+    content: '<p data-type="verse"><br></p><p><br></p><p data-type="chorus"><br></p><p><br></p>',
+    beatName: '',
+    updatedAt: Date.now()
+  };
+}
+
+function createProject() {
+  const p = newProjectData();
+  projects.unshift(p);
+  currentId = p.id;
+  saveProjects();
+  renderProjects();
+  loadProjectToEditor(currentId);
+}
+
+function loadProjectToEditor(id) {
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+  currentId = id;
+  titleInput.value = p.title === 'Без названия' ? '' : p.title;
+  editor.innerHTML = p.content;
+  document.getElementById('beat-name').textContent = p.beatName || 'файл не выбран';
+  document.getElementById('beat-audio').removeAttribute('src');
+  updateStats();
+  renderProjects();
+  statusEl.textContent = 'Загружен';
+}
+
+function saveCurrent() {
+  const p = projects.find(x => x.id === currentId);
+  if (!p) return;
+  p.title = titleInput.value.trim() || 'Без названия';
+  p.content = editor.innerHTML;
+  p.updatedAt = Date.now();
+  saveProjects();
+  statusEl.textContent = '✓ ' + new Date().toLocaleTimeString();
+  renderProjects();
+}
+
+function deleteProject(id, ev) {
+  ev.stopPropagation();
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm('Удалить проект "' + p.title + '"?')) return;
+  projects = projects.filter(x => x.id !== id);
+  if (currentId === id) {
+    currentId = projects.length ? projects[0].id : null;
+    if (currentId) loadProjectToEditor(currentId);
+    else createProject();
+  }
+  saveProjects();
+  renderProjects();
+}
+
+const projectListEl = document.getElementById('project-list');
+
+function renderProjects() {
+  projectListEl.innerHTML = '';
+  if (!projects.length) {
+    const li = document.createElement('li');
+    li.style.cssText = 'color:#666;font-size:12px;padding:8px;font-family:sans-serif;';
+    li.textContent = 'Нет проектов';
+    projectListEl.appendChild(li);
+    return;
+  }
+  projects.forEach(p => {
+    const li = document.createElement('li');
+    li.className = 'project-item' + (p.id === currentId ? ' active' : '');
+
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'p-title';
+    titleSpan.textContent = p.title;
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'p-del';
+    delBtn.textContent = '×';
+    delBtn.title = 'Удалить';
+    delBtn.onclick = (e) => deleteProject(p.id, e);
+
+    li.appendChild(titleSpan);
+    li.appendChild(delBtn);
+    li.onclick = () => {
+      saveCurrent();
+      loadProjectToEditor(p.id);
+    };
+    projectListEl.appendChild(li);
+  });
+}
+
+let saveTimer;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveCurrent, 800);
+}
+editor.addEventListener('input', () => { updateStats(); scheduleSave(); });
+titleInput.addEventListener('input', scheduleSave);
+
+function updateStats() {
+  const text = editor.innerText;
+  const lines = text.split('\n').filter(l => l.trim()).length;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const chars = text.replace(/\s/g, '').length;
+  document.getElementById('stat-lines').textContent = lines;
+  document.getElementById('stat-words').textContent = words;
+  document.getElementById('stat-chars').textContent = chars;
+}
+
+document.querySelectorAll('[data-add]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const type = btn.dataset.add;
+    const p = document.createElement('p');
+    p.setAttribute('data-type', type);
+    p.innerHTML = '<br>';
+    editor.appendChild(p);
+    const range = document.createRange();
+    range.selectNodeContents(p);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    editor.focus();
+    scheduleSave();
+  });
+});
+
+const beatFileInput = document.getElementById('beat-file');
+const beatAudio = document.getElementById('beat-audio');
+const beatNameEl = document.getElementById('beat-name');
+
+beatFileInput.addEventListener('change', () => {
+  const file = beatFileInput.files[0];
+  if (!file) return;
+  beatAudio.src = URL.createObjectURL(file);
+  beatNameEl.textContent = file.name;
+  const p = projects.find(x => x.id === currentId);
+  if (p) { p.beatName = file.name; saveProjects(); }
+});
+
+const rhymeInput = document.getElementById('rhyme-input');
+const rhymeList = document.getElementById('rhyme-list');
+const rhymeStatus = document.getElementById('rhyme-status');
+
+let rhymeController = null;
+let rhymeTimer = null;
+
+async function fetchRhymes(word) {
+  if (rhymeController) rhymeController.abort();
+  rhymeController = new AbortController();
+
+  rhymeStatus.className = 'rhyme-status loading';
+  rhymeStatus.textContent = 'Ищу рифмы...';
+  rhymeList.innerHTML = '';
+
+  try {
+    const url = 'https://api.datamuse.com/words?'
+      + 'rel_rhy=' + encodeURIComponent(word)
+      + '&max=30';
+
+    const res = await fetch(url, { signal: rhymeController.signal });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    let data = await res.json();
+
+    if (!data.length) {
+      const url2 = 'https://api.datamuse.com/words?'
+        + 'rel_nry=' + encodeURIComponent(word)
+        + '&max=30';
+      const res2 = await fetch(url2, { signal: rhymeController.signal });
+      data = await res2.json();
+      if (data.length) {
+        rhymeStatus.className = 'rhyme-status';
+        rhymeStatus.textContent = 'Точных нет — вот созвучия:';
+      }
+    }
+
+    if (!data.length) {
+      rhymeStatus.className = 'rhyme-status';
+      rhymeStatus.textContent = 'Ничего не найдено 😕';
+      return;
+    }
+
+    if (rhymeStatus.classList.contains('loading')) {
+      rhymeStatus.className = 'rhyme-status';
+      rhymeStatus.textContent = 'Найдено: ' + data.length;
+    }
+
+    data.forEach(item => {
+      const li = document.createElement('li');
+      const wordSpan = document.createElement('span');
+      wordSpan.textContent = item.word;
+      const scoreSpan = document.createElement('span');
+      scoreSpan.className = 'r-score';
+      scoreSpan.textContent = item.score || '';
+      li.appendChild(wordSpan);
+      li.appendChild(scoreSpan);
+      li.title = 'Кликните, чтобы вставить в текст';
+      li.onclick = () => insertWordAtCursor(item.word);
+      rhymeList.appendChild(li);
+    });
+
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+    rhymeStatus.className = 'rhyme-status error';
+    rhymeStatus.textContent = 'Ошибка сети. Проверьте интернет.';
+    console.warn('Rhyme error:', err);
+  }
+}
+
+rhymeInput.addEventListener('input', () => {
+  clearTimeout(rhymeTimer);
+  const word = rhymeInput.value.trim();
+  if (!word) {
+    rhymeList.innerHTML = '';
+    rhymeStatus.className = 'rhyme-status';
+    rhymeStatus.textContent = 'Введите слово и нажмите Enter';
+    return;
+  }
+  rhymeTimer = setTimeout(() => fetchRhymes(word), 500);
+});
+
+rhymeInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    clearTimeout(rhymeTimer);
+    const word = rhymeInput.value.trim();
+    if (word) fetchRhymes(word);
+  }
+});
+
+function insertWordAtCursor(word) {
+  editor.focus();
+  const sel = window.getSelection();
+  if (!sel.rangeCount) {
+    editor.innerHTML += ' ' + word;
+    scheduleSave();
+    return;
+  }
+  const range = sel.getRangeAt(0);
+  if (!editor.contains(range.commonAncestorContainer)) {
+    editor.innerHTML += ' ' + word;
+    scheduleSave();
+    return;
+  }
+  range.deleteContents();
+  range.insertNode(document.createTextNode(word + ' '));
+  range.collapse(false);
+  sel.removeAllRanges();
+  sel.addRange(range);
+  updateStats();
+  scheduleSave();
+}
+
+document.getElementById('btn-add-project').addEventListener('click', () => {
+  saveCurrent();
+  createProject();
+});
+document.getElementById('btn-save').addEventListener('click', saveCurrent);
+
+loadProjects();
+if (!projects.length) {
+  projects.push(newProjectData());
+  currentId = projects[0].id;
+  saveProjects();
+} else {
+  currentId = projects[0].id;
+}
+renderProjects();
+loadProjectToEditor(currentId);
+updateStats();
+</script>
+
+</body>
+</html>
